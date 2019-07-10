@@ -6,67 +6,73 @@
 
 # for explanation of this function see explain_min2maximin
 
-convert_min2max <- function(cm, ft, ss, mn){
+convert_min2maximin <- function(cm, ft, ss, mn){
   nz <- number_of_zones(cm)
   nc <- number_of_planning_units(cm)
   nf <- number_of_features(cm)
   nft <- length(ft) # number of focal targets
+  dimA <- dim(cm$A()) # this is the nf + cells, by cells x zones
   
   Z <-  1  
   za <- rep(0, nz*nc)        # create a string of zeros for padding
   
-  # the objective function 
-  obj <-  c(Z,  rep(za, nft+1)) 
+  # the objective function is to maximize Z only
+  obj <-  c(Z,  rep(0, nft), za) 
   
   # the constraints matrix 
   # we can make this from the components of the prior matrix
-  # emty one will be length(obj) x (nft + nf + 
-  nA <- list()
-  ai <- i
+  # it will need to go in a matrix that is 
+  # nrow = nft + original A matrix rows (which contain feature targets, one zone only and and transitions) + making sure the z targets are selected the same cells as the ozo. 
+  # ncol = z(1) + (nft + 1) * nz*nc (as need to equate Z selections with one zone only)
+  narows <- nft + dimA[1] + (nft * nz * nc)
+  nacols <- 1 + (nft + 1) * (nz * nc)
+  newA <- Matrix(0, nrow = narows, ncol = nacols)
+  ai <- 1
   
   # for each focal target, need a line that is Z - bs
   for (i in 1:nft){
     fti <- ft[i]
-    bsi <- cm$A()[fti]
-    nA[ai] <- c(Z,  rep(za, i-1), -bsi,  rep(za, nft-i))
+    bsi <- cm$A()[fti,]
+    newA[ai, ] <- c(Z,  rep(za, i-1), -bsi,  rep(za, nft-i), za)
     ai <- ai + 1
   }
   
-  # for each feature, want a target 
+  # for each feature, want need to reach the target 
   # (as this is how we did it before, it keeps option open for targets, and it helps us calculate the features later)
   for (i in 1:nf){
-    bsi <- cm$A()[i]
-    newA[ai,] <- c(0,  rep(za, nft), bsi)
+    bsi <- cm$A()[i,]
+    newA[ai, ] <- c(0,  rep(za, nft), bsi)
     ai <- ai + 1
   }
 
 # then we need a one zone only + transition constraints matrix, which is the rest of the original A matrix
 # padded out with zeros
   ozo <- cm$A()[-c(1:nf), ]
-  bzo <- ozo*0
   # ozo1 is the basic, one zone only matrix, applied to the targets only
   endai <- ai + dim(ozo)[1] -1
-  newA[ai:endai,] <- cbind(0, rep(bzo, nft), ozo) 
+  newA[ai:endai, ] <- cBind(Matrix(0, nrow = dim(ozo)[1], ncol = 1 + (nft*nc*nz), sparse = TRUE), ozo) 
   ai <- endai + 1
   
-  # then we specify that the same cells need to be selected in the same zone, for both the targets and the feature zconstraints
+  # then we specify that the same cells need to be selected in the same zone, for both the targets and the feature zconstraints (between the feature constraints is then redundant)
   for(zi in 1:nz){
-    # for each zone, need a diag matrix in the zone position
-    bzd <- cbind( matrix(0, nrow = nc, ncol = nc*(zi-1)),
-                  diag(nc), 
-                  matrix(0, nrow = nc, ncol = nc*(nz-zi)))
-    # then combine this with the other components
-    ozzi <- cbind( matrix(0, nrow = nc),  # zrow
-                   rep(bzd, nft),         # repeat the nz*nc matrix nft times
+    # for each zone, need a diag matrix in the zone position, and at the end
+    bzzi <- cBind( Matrix(0, nrow = nc),  # zrow
+                   Matrix(0, nrow = nc, ncol = nc*(zi-1)),
+                   diag(nc), 
+                   Matrix(0, nrow = nc, ncol = nc*(nz-zi)),
+                   diag(x = -1, nc))
+    # then each feature z score needs to equate to the others. 
+    ozzi <- cBind( Matrix(0, nrow = nc),  # zrow
+                   do.call(cbind, replicate(nft, bzd)),         # repeat the nz*nc matrix nft times
                    diag(nc) * -nft )      # negate the targets one by nft times to give rhs of 0
     # and join to the list
     endai <- ai + dim(ozzi)[1] -1
-    newA[ai:endai,] <- ozzi 
+    newA[ai:endai, ] <- ozzi 
     ai <- endai + 1
   }
   
   nA <- dplyr::bind_rows(newA)
-  nA <- as.matrix(nA, sparse = TRUE)
+  nA <- Matrix(nA, sparse = TRUE)
 
   
   

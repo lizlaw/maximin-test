@@ -74,5 +74,7 @@ sim_features_zones
   solution <- gurobi(gm_max, gp)
   
 # to solve as a maxi-min problem only (maximize the minimum feature target achievement)  
-  
+  # reconfigure the problem (compiled min problem, focal feats, start solution, name)
+  source('convert_min2maximin.R')
+  gm_maximin <- convert_min2maximin(o, c(2:4), start_solution, 'test_maximin')
   
