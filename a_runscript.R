@@ -1,4 +1,5 @@
-# Simple version of using prioritizr to compile problems for gurobi, and modifying the problem to include maximin, &  multiple objectives, over a range of ag/cb targets
+# Simple version of using prioritizr to compile problems for gurobi, and modifying the problem to include maximin, &  
+# multiple objectives, over a range of ag/cb targets
 
 # libraries
 library(prioritizr)
@@ -24,7 +25,8 @@ sim_features_zones
   plot(sum_spp)
   
 # we have allowed and not allowed transitions
-# transitions are a raster stack, nzones layers long, binary (0) not allowed, (1) alowed. Cells must be allowed in at least one of the zones
+# transitions are a raster stack, nzones layers long, binary (0) not allowed, (1) alowed. 
+# Cells must be allowed in at least one of the zones
   source('sim_transitionstack.R')
   transitions <- sim_transitionstack(sim_features_zones, 0.9)
   puid <- sim_puid(sim_features_zones)
@@ -33,7 +35,7 @@ sim_features_zones
   source('locked_dataframe_create.R')
   locked_dataframe <- locked_dataframe_create(transitions, puid)
   
-# need max feat, as targets are based off these  
+# need max feat, as targets are based off these (ie all scaled to % of relative maximum)
   source('calculate_max_feat.R')
   max_feat <- calculate_max_feat(sim_features_zones)
   
@@ -55,7 +57,7 @@ sim_features_zones
     add_binary_decisions() %>%
     add_gurobi_solver(gap = 0.01, presolve = 2, time_limit = 1000)
 
-# compile the problem for gurobivia prioritizr  
+# compile the problem for gurobi via prioritizr  
   o <- compile(p0)
   
 # recompile for gurobi ===================================
