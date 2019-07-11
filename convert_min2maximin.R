@@ -54,6 +54,7 @@ convert_min2maximin <- function(cm, ft, ss, mn){
   ai <- endai + 1
   
   # then we specify that the same cells need to be selected in the same zone, for both the targets and the feature zconstraints (between the feature constraints is then redundant)
+ ### ONE WAY TO DO THIS MORE EASILY MIGHT BE THROUGH THE USE OF KRONECKER PRODUCTS %*% OR OTHER MATRIX OPERATIONS
   for(zi in 1:nz){
     # for each zone, need a diag matrix in the zone position, and at the end
     bzzi <- cBind( Matrix(0, nrow = nc),  # zrow
