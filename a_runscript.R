@@ -6,6 +6,7 @@ library(prioritizr)
 library(gurobi)
 library(tidyverse)
 library(rlist)
+library(Matrix)
 
 # Make test data  =====================================
 
@@ -77,4 +78,15 @@ sim_features_zones
   # reconfigure the problem (compiled min problem, focal feats, start solution, name)
   source('convert_min2maximin.R')
   gm_maximin <- convert_min2maximin(o, c(2:4), start_solution, 'test_maximin')
+  solution <- gurobi(gm_maximin, gp)
+  
+# which constraints are binding/more flexible?
+  # the first nft bars are the zconstraints, and then there are nf others. Here it is the first feature target that is constraining the solution
+  barplot(abs(solution$slack[1:8])) 
+  
+# what is the solution? create a template from the start solution, paste in the solution values (just one nz*nc set), and convert. 
+  rs <- stack(replicate(3, start_solution))
+  rs[] <- solution$x[-1][1:300] 
+  plot(category_layer(rs))
+  
   

@@ -13,5 +13,5 @@ convert_min2max <- function(cm, ss, mn){
     vtype = cm$vtype(),
     sense = cm$sense(),
     A = cm$A(),
-    Start = ss)  # add start solution
+    Start = binary_stack(ss) %>% values() %>% c())  # add start solution
 }
