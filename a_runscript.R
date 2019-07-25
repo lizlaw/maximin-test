@@ -82,11 +82,16 @@ sim_features_zones
   
 # which constraints are binding/more flexible?
   # the first nft bars are the zconstraints, and then there are nf others. Here it is the first feature target that is constraining the solution
-  barplot(abs(solution$slack[1:8])) 
+  source('slack_plot_maximin.R')
+  slack_plot_maximin(solution, p0, nft) 
   
 # what is the solution? create a template from the start solution, paste in the solution values (just one nz*nc set), and convert. 
-  rs <- stack(replicate(3, start_solution))
-  rs[] <- solution$x[-1][1:300] 
-  plot(category_layer(rs))
+  library(ggthemes)
+  source('get_solution_r_maximin.R')
+  source('plot_cl_solution.R')
+  rs <- get_solution_r_maximin(solution, p0, start_solution)
+  plot_cl_solution(rs)
   
+  
+ 
   

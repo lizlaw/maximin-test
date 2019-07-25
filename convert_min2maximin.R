@@ -69,6 +69,7 @@ convert_min2maximin <- function(cm, ft, ss, mn){
   
   # then we specify that the same cells need to be selected in the same zone, for all  the feature zconstraints and the targets
   # we need to do this for each nft, equating it with the fts (ie 1 -1 = 0)
+
   for(zi in 1:nz){
     
     # for each zone, need a diag matrix in the zone position, and at the end
@@ -114,3 +115,4 @@ convert_min2maximin <- function(cm, ft, ss, mn){
 
   return(model)  
 }
+
