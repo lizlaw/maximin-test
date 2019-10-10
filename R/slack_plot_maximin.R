@@ -7,7 +7,7 @@ slack_plot_maximin <- function(sol, p0, nft, c1 = 'red', c2 = 'blue'){
   slack <- solution$slack[1:(nf+nft)] %>% abs()
   fname <- c(paste('max_tf', 1:nft), paste('target', 1:nf))
   clrs <- c(rep(c1, nft), rep(c2, nf))
-  svs <- data_frame(fname, slack) 
+  svs <- tibble(fname, slack) 
   ggplot(svs, aes(fname, slack)) + 
     geom_col(fill = clrs, colour = clrs) + 
     theme_light() +

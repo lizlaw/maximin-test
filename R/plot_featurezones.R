@@ -9,7 +9,7 @@ plot_featurezones <- function(fz){
   for (i in 1:nz){
     for (j in 1:nf){
       plot(fz[[i]][[j]],
-           main = paste0("Zone ", i, "(species ", j ))
+           main = paste0("Zone ", i, " (species ", j, ")" ))
     }}
   suppressWarnings(par(par_old))
 }
